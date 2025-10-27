@@ -1,4 +1,3 @@
-// lib/providers/poem_provider.dart
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
@@ -8,6 +7,7 @@ import '../models/poem.dart';
 class PoemProvider with ChangeNotifier {
   static const _dbName = 'poems.db';
   static const _table = 'poems';
+   static const _dbVersion = 2; 
   Database? _db;
 
   final List<Poem> _items = [];
@@ -28,14 +28,15 @@ class PoemProvider with ChangeNotifier {
     final path = join(dir, _dbName);
     _db = await openDatabase(
       path,
-      version: 2,
+      version: _dbVersion,
       onCreate: (db, v) async {
         await db.execute('''
           CREATE TABLE $_table(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
-            composer TEXT NOT NULL,
             lyricist TEXT NOT NULL,
+            composer TEXT NOT NULL,
+            artist TEXT NOT NULL DEFAULT '',
             genre TEXT NOT NULL,
             year INTEGER NOT NULL,
             songKey TEXT NOT NULL,
@@ -44,18 +45,23 @@ class PoemProvider with ChangeNotifier {
             lyrics TEXT NOT NULL
           )
         ''');
+        },
+      onUpgrade: (db, oldV, newV) async {
+        if (oldV < 2) {
+          // เพิ่มคอลัมน์ artist ถ้ายังไม่มี (SQLite ไม่รองรับ IF NOT EXISTS สำหรับคอลัมน์)
+          await db.execute("ALTER TABLE $_table ADD COLUMN artist TEXT NOT NULL DEFAULT ''");
+        }
       },
     );
   }
 
   Future<void> fetchAll({String? keyword, String? orderBy}) async {
     if (_db == null) return;
-    final where = (keyword == null || keyword.trim().isEmpty)
-        ? null
-        : 'title LIKE ? OR composer LIKE ? OR lyricist LIKE ? OR lyrics LIKE ?';
-    final args = (keyword == null || keyword.trim().isEmpty)
-        ? null
-        : List.filled(4, '%${keyword.trim()}%');
+    final hasKw = keyword != null && keyword.trim().isNotEmpty;
+    final where = hasKw
+        ? 'title LIKE ? OR artist LIKE ? OR lyricist LIKE ? OR composer LIKE ? OR lyrics LIKE ?'
+        : null;
+    final args = hasKw ? List.filled(5, '%${keyword!.trim()}%') : null;
 
     final rows = await _db!.query(
       _table,
@@ -90,8 +96,7 @@ class PoemProvider with ChangeNotifier {
 
   Future<int> delete(int id) async {
     if (_db == null) return 0;
-    final rows =
-        await _db!.delete(_table, where: 'id = ?', whereArgs: [id]);
+    final rows = await _db!.delete(_table, where: 'id = ?', whereArgs: [id]);
     _items.removeWhere((e) => e.id == id);
     notifyListeners();
     return rows;

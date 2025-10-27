@@ -48,12 +48,12 @@ class _PoemListScreenState extends State<PoemListScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             child: TextField(
               controller: _search,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
-                hintText: 'ค้นหา (ชื่อเพลง/ศิลปิน)',
+                hintText: 'ค้นหา (ชื่อเพลง/ศิลปิน/เนื้อเพลง)',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
@@ -67,6 +67,7 @@ class _PoemListScreenState extends State<PoemListScreen> {
                   .fetchAll(keyword: _search.text, orderBy: _orderBy),
             ),
           ),
+          const Divider(height: 16),
           Expanded(
             child: provider.items.isEmpty
                 ? const Center(child: Text('ยังไม่มีข้อมูล กด + เพื่อเพิ่ม'))
@@ -75,26 +76,21 @@ class _PoemListScreenState extends State<PoemListScreen> {
                     itemBuilder: (_, i) {
                       final p = provider.items[i];
                       return Card(
-                        margin:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         child: ListTile(
                           leading: IconButton(
                             icon: Icon(
-                              p.isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
+                              p.isFavorite ? Icons.favorite : Icons.favorite_border,
                               color: Colors.pinkAccent,
                             ),
                             onPressed: () {
                               if (p.id != null) {
-                                context
-                                    .read<PoemProvider>()
-                                    .toggleFavorite(p.id!);
+                                context.read<PoemProvider>().toggleFavorite(p.id!);
                               }
                             },
                           ),
                           title: Text(p.title),
-                          subtitle: Text('${p.lyricist} • ${p.composer} • ${p.year}'),
+                          subtitle: Text('${p.artist} · ${p.lyricist} · ${p.year}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -105,8 +101,7 @@ class _PoemListScreenState extends State<PoemListScreen> {
                                   await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          AddEditPoemScreen(existing: p),
+                                      builder: (_) => AddEditPoemScreen(existing: p),
                                     ),
                                   );
                                 },
@@ -122,22 +117,18 @@ class _PoemListScreenState extends State<PoemListScreen> {
                                       content: Text('ต้องการลบ "${p.title}" หรือไม่?'),
                                       actions: [
                                         TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
+                                          onPressed: () => Navigator.pop(context, false),
                                           child: const Text('ยกเลิก'),
                                         ),
                                         FilledButton.tonal(
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
+                                          onPressed: () => Navigator.pop(context, true),
                                           child: const Text('ลบ'),
                                         ),
                                       ],
                                     ),
                                   );
                                   if (confirm == true && p.id != null) {
-                                    await context
-                                        .read<PoemProvider>()
-                                        .delete(p.id!);
+                                    await context.read<PoemProvider>().delete(p.id!);
                                   }
                                 },
                               ),

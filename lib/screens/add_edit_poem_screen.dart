@@ -1,4 +1,4 @@
-// lib/screens/add_edit_poem_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/poem.dart';
@@ -14,20 +14,19 @@ class AddEditPoemScreen extends StatefulWidget {
 
 class _AddEditPoemScreenState extends State<AddEditPoemScreen> {
   final _form = GlobalKey<FormState>();
-  late String _title, _composer, _lyricist, _key, _lyrics;
+  late String _title, _lyricist, _composer, _artist, _key, _lyrics;
   late int _year, _bpm;
   PoemGenre _genre = PoemGenre.other;
-  
-  bool _isFav = false;
-  String _youtubeUrl = '';  
+  bool _isFav = false;  
 
   @override
   void initState() {
     super.initState();
     final e = widget.existing;
     _title = e?.title ?? '';
-    _composer = e?.composer ?? '';
     _lyricist = e?.lyricist ?? '';
+    _composer = e?.composer ?? '';
+    _artist = e?.artist ?? '';
     _genre = e?.genre ?? PoemGenre.other;
     _year = e?.year ?? DateTime.now().year;
     _key = e?.key ?? 'C';
@@ -42,8 +41,9 @@ class _AddEditPoemScreenState extends State<AddEditPoemScreen> {
     final p = Poem(
       id: widget.existing?.id,
       title: _title,
-      composer: _composer,
       lyricist: _lyricist,
+      composer: _composer,
+      artist: _artist,
       genre: _genre,
       year: _year,
       key: _key,
@@ -77,14 +77,14 @@ class _AddEditPoemScreenState extends State<AddEditPoemScreen> {
               TextFormField(
                 initialValue: _title,
                 decoration: const InputDecoration(labelText: 'ชื่อเพลง/บทประพันธ์'),
-                validator: (v) => v == null || v.trim().isEmpty ? 'กรอกชื่อ' : null,
+                validator: (v) => v == null || v.trim().isEmpty ? 'กรอกชื่อเพลง' : null,
                 onSaved: (v) => _title = v!.trim(),
               ),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
-                      initialValue: _composer,
+                      initialValue: _lyricist,
                       decoration: const InputDecoration(labelText: 'ผู้ประพันธ์คำร้อง'),
                       validator: (v) => v == null || v.isEmpty ? 'กรอกชื่อ' : null,
                       onSaved: (v) => _composer = v!.trim(),
@@ -93,22 +93,19 @@ class _AddEditPoemScreenState extends State<AddEditPoemScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextFormField(
-                      initialValue: _lyricist,
+                      initialValue: _composer,
                       decoration: const InputDecoration(labelText: 'ผู้ประพันธ์ทำนอง'),
                       validator: (v) => v == null || v.isEmpty ? 'กรอกชื่อ' : null,
                       onSaved: (v) => _lyricist = v!.trim(),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: _lyricist,
-                      decoration: const InputDecoration(labelText: 'ศิลปิน'),
-                      validator: (v) => v == null || v.isEmpty ? 'กรอกชื่อ' : null,
-                      onSaved: (v) => _lyricist = v!.trim(),
-                    ),
-                  ),
-                ],
+                  ],
+              ),
+              TextFormField(
+                initialValue: _artist,
+                decoration: const InputDecoration(labelText: 'ศิลปิน'),
+                validator: (v) => v == null || v.isEmpty ? 'กรอกศิลปิน' : null,
+                onSaved: (v) => _artist = v!.trim(),
               ),
               DropdownButtonFormField<PoemGenre>(
                 value: _genre,

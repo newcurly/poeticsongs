@@ -1,13 +1,14 @@
-// lib/models/poem.dart
+
 enum PoemGenre { lyric, ballad, lullaby, hymn, folk, other }
 
 class Poem {
   final int? id;
   final String title;       // ชื่อบทเพลง/บทประพันธ์
+  final String lyricist;    // ผู้ประพันธ์คำร้อง
   final String composer;    // ผู้ประพันธ์ทำนอง
-  final String lyricist;    // ผู้ประพันธ์เนื้อร้อง
+  final String artist;      // ศิลปิน 
   final PoemGenre genre;    // แนว/ประเภท
-  final int year;           // ปีที่ประพันธ์/เผยแพร่
+  final int year;           // ปีที่เผยแพร่
   final String key;         // คีย์เพลง (เช่น C, Gm)
   final int bpm;            // ความเร็ว (BPM)
   final bool isFavorite;    // บันทึกเป็นรายการโปรด
@@ -16,8 +17,9 @@ class Poem {
   Poem({
     this.id,
     required this.title,
-    required this.composer,
     required this.lyricist,
+    required this.composer,
+    required this.artist,
     required this.genre,
     required this.year,
     required this.key,
@@ -29,8 +31,9 @@ class Poem {
   Map<String, dynamic> toMap() => {
         'id': id,
         'title': title,
-        'composer': composer,
         'lyricist': lyricist,
+        'composer': composer,
+        'artist': artist, 
         'genre': genre.name,
         'year': year,
         'songKey': key,
@@ -42,8 +45,9 @@ class Poem {
   factory Poem.fromMap(Map<String, dynamic> m) => Poem(
         id: m['id'] as int?,
         title: m['title'] as String,
-        composer: m['composer'] as String,
-        lyricist: m['lyricist'] as String,
+        lyricist: (m['lyricist'] ?? '') as String,
+        composer: (m['composer'] ?? '') as String,
+        artist: (m['artist'] ?? '') as String,
         genre: PoemGenre.values.firstWhere(
           (g) => g.name == (m['genre'] as String? ?? 'other'),
           orElse: () => PoemGenre.other,
@@ -58,8 +62,9 @@ class Poem {
   Poem copyWith({
     int? id,
     String? title,
-    String? composer,
     String? lyricist,
+    String? composer,
+    String? artist,
     PoemGenre? genre,
     int? year,
     String? key,
@@ -70,8 +75,9 @@ class Poem {
     return Poem(
       id: id ?? this.id,
       title: title ?? this.title,
-      composer: composer ?? this.composer,
       lyricist: lyricist ?? this.lyricist,
+      composer: composer ?? this.composer,
+      artist: artist ?? this.artist,
       genre: genre ?? this.genre,
       year: year ?? this.year,
       key: key ?? this.key,
