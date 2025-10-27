@@ -1,0 +1,83 @@
+// lib/models/poem.dart
+enum PoemGenre { lyric, ballad, lullaby, hymn, folk, other }
+
+class Poem {
+  final int? id;
+  final String title;       // ชื่อบทเพลง/บทประพันธ์
+  final String composer;    // ผู้ประพันธ์ทำนอง
+  final String lyricist;    // ผู้ประพันธ์เนื้อร้อง
+  final PoemGenre genre;    // แนว/ประเภท
+  final int year;           // ปีที่ประพันธ์/เผยแพร่
+  final String key;         // คีย์เพลง (เช่น C, Gm)
+  final int bpm;            // ความเร็ว (BPM)
+  final bool isFavorite;    // บันทึกเป็นรายการโปรด
+  final String lyrics;      // เนื้อเพลง/บทกวีเต็ม
+
+  Poem({
+    this.id,
+    required this.title,
+    required this.composer,
+    required this.lyricist,
+    required this.genre,
+    required this.year,
+    required this.key,
+    required this.bpm,
+    this.isFavorite = false,
+    required this.lyrics,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'title': title,
+        'composer': composer,
+        'lyricist': lyricist,
+        'genre': genre.name,
+        'year': year,
+        'songKey': key,
+        'bpm': bpm,
+        'isFavorite': isFavorite ? 1 : 0,
+        'lyrics': lyrics,
+      };
+
+  factory Poem.fromMap(Map<String, dynamic> m) => Poem(
+        id: m['id'] as int?,
+        title: m['title'] as String,
+        composer: m['composer'] as String,
+        lyricist: m['lyricist'] as String,
+        genre: PoemGenre.values.firstWhere(
+          (g) => g.name == (m['genre'] as String? ?? 'other'),
+          orElse: () => PoemGenre.other,
+        ),
+        year: m['year'] as int,
+        key: m['songKey'] as String,
+        bpm: m['bpm'] as int,
+        isFavorite: (m['isFavorite'] as int) == 1,
+        lyrics: m['lyrics'] as String,
+      );
+
+  Poem copyWith({
+    int? id,
+    String? title,
+    String? composer,
+    String? lyricist,
+    PoemGenre? genre,
+    int? year,
+    String? key,
+    int? bpm,
+    bool? isFavorite,
+    String? lyrics,
+  }) {
+    return Poem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      composer: composer ?? this.composer,
+      lyricist: lyricist ?? this.lyricist,
+      genre: genre ?? this.genre,
+      year: year ?? this.year,
+      key: key ?? this.key,
+      bpm: bpm ?? this.bpm,
+      isFavorite: isFavorite ?? this.isFavorite,
+      lyrics: lyrics ?? this.lyrics,
+    );
+  }
+}
